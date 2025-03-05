@@ -62,7 +62,7 @@ async function uploadFile() {
     }
 }
 
-// ฟังก์ชันโหลดรายการไฟล์
+// ฟังก์ชันดาวน์โหลดไฟล์
 async function loadFiles() {
     try {
         const res = await fetch(`${API_URL}/files`);
