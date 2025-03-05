@@ -29,6 +29,7 @@ function login() {
         document.getElementById("loginSection").classList.add("d-none");
         document.getElementById("fileSection").classList.remove("d-none");
         loadFiles();
+        alert(`เข้าสู่ระบบสำเร็จ! สวัสดีคุณ ${username}`);
         console.log("----------------------------");
         console.log("ชื่อผู้ใช้:", username);
         console.log("เวลาล่าสุดที่เข้าใช้:", lastLogin);
