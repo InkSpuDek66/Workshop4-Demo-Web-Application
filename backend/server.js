@@ -1,5 +1,3 @@
-/* === Backend (Node.js + Express) === */
-
 const express = require("express");
 const multer = require("multer");
 const fs = require("fs");
@@ -20,27 +18,10 @@ app.use(express.static("uploads"));
 const storage = multer.diskStorage({
   destination: "uploads/",
   filename: (req, file, cb) => {
-    cb(null, '[' + Date.now() + ' ms] - ' + file.originalname);
+    cb(null, '[' + Date.now() + '] - ' + file.originalname);
   }
 });
 const upload = multer({ storage });
-
-// ตรวจสอบการล็อกอิน (Secure Mock Authentication)
-const users = [
-  { username: "admin", password: "password" },
-  { username: "user", password: "1234" }
-];
-
-app.post("/login", (req, res) => {
-  const { username, password } = req.body;
-  const user = users.find(u => u.username === username && u.password === password);
-
-  if (user) {
-    res.json({ success: true, message: "Login successful" });
-  } else {
-    res.status(401).json({ success: false, message: "Invalid username or password" });
-  }
-});
 
 // อัปโหลดไฟล์
 app.post("/upload", upload.single("file"), (req, res) => {
