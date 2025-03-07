@@ -56,13 +56,15 @@ app.get("/download/:filename", (req, res) => {
 // ลบไฟล์
 app.delete("/delete/:filename", (req, res) => {
   const filePath = path.join("uploads", req.params.filename);
+  const jsonFilePath = `${filePath}.json`;
+
   fs.unlink(filePath, (err) => {
     if (err) return res.status(500).json({ message: "Error deleting file" });
-    res.json({ message: "File deleted" });
-  });
-  fs.unlink(`${filePath}.json`, (err) => {
-    if (err) return res.status(500).json({ message: "Error deleting file" });
-    res.json({ message: "File deleted" });
+
+    fs.unlink(jsonFilePath, (err) => {
+      if (err) return res.status(500).json({ message: "Error deleting file metadata" });
+      res.json({ message: "File deleted" });
+    });
   });
 });
 
