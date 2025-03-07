@@ -28,6 +28,9 @@
             <div>
                 <button class="btn btn-primary w-100" onclick="login()"><b>เข้าสู่ระบบ</b></button>
             </div>
+            <div class="text-center">
+                <label id="loginAgainLabel" class="d-none">LogIn Again: <span id="countdown">3</span> seconds</label>
+            </div>
             <!-- <div class="mt-3">
                 <p class="text-center">ยังไม่มีบัญชีผู้ใช้? <a href="register.html">สมัครสมาชิก</a></p>
             </div> -->
@@ -56,24 +59,6 @@
         <!-- ปุ่ม Logout -->
         <center><button class="btn btn-danger " style="width: 8rem ; margin-top: 5rem;"
                 onclick="logout()">ออกจากระบบ</button></center>
-    </div>
-    
-    <!-- Modal HTML -->
-    <div id="lockoutModal" class="modal fade" tabindex="-1" role="dialog">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">ล็อกอินผิดพลาด</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <p>คุณล็อกอินผิดพลาดเกิน 3 ครั้ง กรุณารอ 3 วินาทีแล้วลองใหม่อีกครั้ง</p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary" id="modalOkButton">ตกลง</button>
-          </div>
-        </div>
-      </div>
     </div>
 
     <script src="script.js"></script>

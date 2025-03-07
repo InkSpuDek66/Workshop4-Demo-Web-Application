@@ -48,6 +48,8 @@ function login() {
             const loginButton = document.querySelector("button[onclick='login()']");
             const usernameInput = document.getElementById("username");
             const passwordInput = document.getElementById("password");
+            const loginAgainLabel = document.getElementById("loginAgainLabel");
+            const countdown = document.getElementById("countdown");
 
             loginButton.disabled = true;
             loginButton.classList.add("btn-secondary");
@@ -57,6 +59,20 @@ function login() {
             passwordInput.disabled = true;
             usernameInput.classList.add("bg-secondary");
             passwordInput.classList.add("bg-secondary");
+
+            loginAgainLabel.classList.remove("d-none");
+
+            let timeLeft = 3;
+            countdown.textContent = timeLeft;
+
+            const countdownInterval = setInterval(() => {
+                timeLeft--;
+                countdown.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    loginAgainLabel.classList.add("d-none");
+                }
+            }, 1000);
 
             alert("คุณล็อกอินผิดพลาดเกิน 3 ครั้ง กรุณารอ 3 วินาทีแล้วลองใหม่อีกครั้ง");
 
