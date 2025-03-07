@@ -1,13 +1,13 @@
 const port = 3000;
 const host = 'localhost'; //192.168.5.23
-const API_URL = `http://${host}:${port}`; // URL ของ Backend
+const API_URL = http://${host}:${port}; // URL ของ Backend
 console.log(API_URL);
 
 // ตรวจสอบการล็อกอินเมื่อหน้าโหลด
 document.addEventListener("DOMContentLoaded", () => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (user) {
-        console.log(`สวัสดีคุณ ${user.username}!`);
+        console.log(สวัสดีคุณ ${user.username}!);
         document.getElementById("loginSection").classList.add("d-none");
         document.getElementById("fileSection").classList.remove("d-none");
         loadFiles();
@@ -47,16 +47,13 @@ function logout() {
 // ฟังก์ชันอัปโหลดไฟล์
 async function uploadFile() {
     const fileInput = document.getElementById("fileInput");
-    const user = JSON.parse(localStorage.getItem("user"));
     if (!fileInput.files.length) return alert("กรุณาเลือกไฟล์!");
-    if (!user) return alert("กรุณาเข้าสู่ระบบ!");
 
     const formData = new FormData();
     formData.append("file", fileInput.files[0]);
-    formData.append("owner", user.username); // ส่งชื่อผู้ใช้ไปยังเซิร์ฟเวอร์
 
     try {
-        const res = await fetch(`${API_URL}/upload`, { method: "POST", body: formData });
+        const res = await fetch(${API_URL}/upload, { method: "POST", body: formData });
         const data = await res.json();
         alert(data.message);
         loadFiles();
@@ -67,11 +64,8 @@ async function uploadFile() {
 
 // ฟังก์ชันโหลดรายการไฟล์
 async function loadFiles() {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (!user) return;
-
     try {
-        const res = await fetch(`${API_URL}/files`);
+        const res = await fetch(${API_URL}/files);
         const files = await res.json();
 
         const fileList = document.getElementById("fileList");
@@ -80,15 +74,13 @@ async function loadFiles() {
         files.forEach(file => {
             const li = document.createElement("li");
             li.className = "list-group-item d-flex justify-content-between align-items-center";
-            li.innerHTML = `
-                ${file.name} (โดย ${file.owner})
+            li.innerHTML = 
+                ${file}
                 <div>
-                    <a href="${API_URL}/download/${file.name}" class="btn btn-primary btn-sm">ดาวน์โหลด</a>
-                    ${file.owner === user.username 
-                        ? `<button class="btn btn-danger btn-sm ms-2" onclick="deleteFile('${file.name}')">ลบ</button>` 
-                        : ''}
+                    <a href="${API_URL}/download/${file}" class="btn btn-primary btn-sm">ดาวน์โหลด</a>
+                    <button class="btn btn-danger btn-sm" onclick="deleteFile('${file}')">ลบ</button>
                 </div>
-            `;
+            ;
             fileList.appendChild(li);
         });
     } catch (err) {
@@ -96,33 +88,12 @@ async function loadFiles() {
     }
 }
 
-// ฟังก์ชันลบไฟล์ (เฉพาะเจ้าของ)
-async function deleteFile(filename) {
-    if (!confirm(`คุณต้องการลบไฟล์ ${filename} หรือไม่?`)) return;
-    
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (!user) return alert("กรุณาเข้าสู่ระบบ!");
-
-    try {
-        const res = await fetch(`${API_URL}/delete/${filename}`, {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username: user.username }) // ส่งชื่อผู้ใช้ไปตรวจสอบที่ Backend
-        });
-        const data = await res.json();
-        alert(data.message);
-        loadFiles();
-    } catch (err) {
-        console.error("Delete Error:", err);
-    }
-}
-
 // ฟังก์ชันลบไฟล์
 async function deleteFile(filename) {
-    if (!confirm(`คุณต้องการลบไฟล์ ${filename} หรือไม่?`)) return;
+    if (!confirm(คุณต้องการลบไฟล์ ${filename} หรือไม่?)) return;
 
     try {
-        const res = await fetch(`${API_URL}/delete/${filename}`, { method: "DELETE" });
+        const res = await fetch(${API_URL}/delete/${filename}, { method: "DELETE" });
         const data = await res.json();
         alert(data.message);
         loadFiles();
@@ -156,6 +127,6 @@ document.getElementById("fileInput").addEventListener("change", () => {
         };
         reader.readAsText(file);
     } else {
-        preview.innerHTML = `<p class="text-danger mt-2">ไม่สามารถแสดงตัวอย่างไฟล์นี้ได้</p>`;
+        preview.innerHTML = <p class="text-danger mt-2">ไม่สามารถแสดงตัวอย่างไฟล์นี้ได้</p>;
     }
 });
