@@ -12,22 +12,100 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
+let failedAttempts = 0;
+let lockoutTimeout;
+
+// ฟังก์ชันล็อกอิน
 function login() {
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
 
     const validUsers = { "admin": "1234", "user1": "password1", "user2": "password2" };
 
+    if (lockoutTimeout) {
+        const lockoutModal = new bootstrap.Modal(document.getElementById('lockoutModal'));
+        lockoutModal.show();
+        return;
+    }
+
     if (validUsers[username] && validUsers[username] === password) {
-        localStorage.setItem("user", JSON.stringify({ username }));
+        failedAttempts = 0; // Reset failed attempts on successful login
+        const lastLogin = new Date().toLocaleString();
+        localStorage.setItem("user", JSON.stringify({ username, lastLogin }));
         document.getElementById("loginSection").classList.add("d-none");
         document.getElementById("fileSection").classList.remove("d-none");
         loadFiles();
+        alert(`เข้าสู่ระบบสำเร็จ! สวัสดีคุณ ${username}`);
+        console.log("----------------------------");
+        console.log("ชื่อผู้ใช้:", username);
+        console.log("เวลาล่าสุดที่เข้าใช้:", lastLogin);
     } else {
-        alert("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!");
+        failedAttempts++;
+        if (failedAttempts >= 3) {
+            countFailedLogin();
+        } else {
+            alert(`ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง! ครั้งที่ : ${failedAttempts}`);
+        }
     }
 }
 
+function countFailedLogin() {
+    const loginButton = document.querySelector("button[onclick='login()']");
+    const usernameInput = document.getElementById("username");
+    const passwordInput = document.getElementById("password");
+    const loginAgain = document.getElementById("loginAgain");
+    const countdown = document.getElementById("countdown");
+
+    loginButton.disabled = true;
+    loginButton.classList.add("btn-secondary");
+    loginButton.classList.remove("btn-primary");
+
+    usernameInput.disabled = true;
+    passwordInput.disabled = true;
+    usernameInput.classList.add("bg-secondary");
+    passwordInput.classList.add("bg-secondary");
+
+    loginAgain.classList.remove("d-none");
+
+    let timeLeft = 3;
+    countdown.textContent = timeLeft;
+
+    const countdownInterval = setInterval(() => {
+        timeLeft--;
+        countdown.textContent = timeLeft;
+        if (timeLeft <= 0) {
+            clearInterval(countdownInterval);
+            loginAgain.classList.add("d-none");
+        }
+    }, 1000);
+
+    alert("คุณล็อกอินผิดพลาดเกิน 3 ครั้ง กรุณารอ 3 วินาทีแล้วลองใหม่อีกครั้ง");
+
+    lockoutTimeout = setTimeout(() => {
+        failedAttempts = 0;
+        lockoutTimeout = null;
+
+        loginButton.disabled = false;
+        loginButton.classList.remove("btn-secondary");
+        loginButton.classList.add("btn-primary");
+
+        usernameInput.disabled = false;
+        passwordInput.disabled = false;
+        usernameInput.classList.remove("bg-secondary");
+        passwordInput.classList.remove("bg-secondary");
+
+        location.reload(); // Refresh the page
+    }, 3000);
+}
+
+// Event listener for modal OK button
+document.getElementById("modalOkButton").addEventListener("click", () => {
+    const lockoutModal = bootstrap.Modal.getInstance(document.getElementById('lockoutModal'));
+    lockoutModal.hide();
+    location.reload(); // Refresh the page
+});
+
+// ฟังก์ชันออกจากระบบ
 function logout() {
     localStorage.removeItem("user");
     alert("ออกจากระบบเรียบร้อย!");
@@ -36,13 +114,15 @@ function logout() {
 
 async function uploadFile() {
     const fileInput = document.getElementById("fileInput");
-    const user = JSON.parse(localStorage.getItem("user"));
     if (!fileInput.files.length) return alert("กรุณาเลือกไฟล์!");
     if (!user) return alert("กรุณาเข้าสู่ระบบ!");
 
     const formData = new FormData();
     formData.append("file", fileInput.files[0]);
     formData.append("owner", user.username);
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    formData.append("username", user.username); // Add username to formData
 
     try {
         const res = await fetch(`${API_URL}/upload`, { method: "POST", body: formData });
@@ -54,6 +134,14 @@ async function uploadFile() {
     }
 }
 
+// ฟังก์ชันยกเลิกการอัปโหลดไฟล์
+function cancelUpload() {
+    const fileInput = document.getElementById("fileInput");
+    fileInput.value = "";
+    document.getElementById("preview").innerHTML = "";
+}
+
+// ฟังก์ชันโหลดรายการไฟล์
 async function loadFiles() {
     const user = JSON.parse(localStorage.getItem("user"));
     if (!user) return;
@@ -76,10 +164,10 @@ async function loadFiles() {
             const li = document.createElement("li");
             li.className = "list-group-item d-flex justify-content-between align-items-center";
             li.innerHTML = `
-                ${file.name} (โดย ${file.owner})
+                ${file.filename} ( อัปโหลดโดย : ${file.username})
                 <div>
-                    <a href="${API_URL}/download/${file.name}" class="btn btn-primary btn-sm">ดาวน์โหลด</a>
-                    <button class="btn btn-danger btn-sm ms-2" onclick="deleteFile('${file.name}')" ${canDelete ? "" : "disabled"}>ลบ</button>
+                    <button class="btn btn-primary btn-sm" onclick="handleDownloadCooldown(this, '${file.filename}')">ดาวน์โหลด</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteFile('${file.filename}')">ลบ</button>
                 </div>
             `;
             fileList.appendChild(li);
@@ -89,6 +177,29 @@ async function loadFiles() {
     }
 }
 
+// ฟังก์ชันคูลดาวน์หลังโหลดไฟล์
+function handleDownloadCooldown(button, file) {
+    let cooldown = 5;
+    button.disabled = true; // ปิดใช้งานปุ่มทันที
+    button.textContent = `รอ ${cooldown} วินาที...`;
+
+    // เริ่มนับถอยหลังทันที
+    const interval = setInterval(() => {
+        cooldown--;
+        if (cooldown > 0) {
+            button.textContent = `รอ ${cooldown} วินาที...`;
+        } else {
+            clearInterval(interval);
+            button.textContent = "ดาวน์โหลด";
+            button.disabled = false; // เปิดใช้งานปุ่มอีกครั้ง
+        }
+    }, 1000);
+
+    // เริ่มดาวน์โหลดไฟล์ทันทีที่กดปุ่ม
+    window.location.href = `${API_URL}/download/${file}`;
+}
+
+// ฟังก์ชันลบไฟล์
 async function deleteFile(filename) {
     if (!confirm(`คุณต้องการลบไฟล์ ${filename} หรือไม่?`)) return;
 
@@ -116,3 +227,59 @@ async function deleteFile(filename) {
     }
 }
 
+// ฟังก์ชันแสดงตัวอย่างไฟล์ก่อนอัปโหลด
+document.getElementById("fileInput").addEventListener("change", () => {
+    const fileInput = document.getElementById("fileInput");
+    const preview = document.getElementById("preview");
+    preview.innerHTML = "";
+
+    const file = fileInput.files[0];
+    if (!file) return; //หยุดการทำงานของฟังก์ชัน
+
+    if (file.type.startsWith("image/")) {
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(file);
+        img.style.maxWidth = "200px";
+        img.className = "mt-2 img-thumbnail";
+        preview.appendChild(img);
+
+        // เพิ่ม event listener สำหรับการคลิกที่ภาพ
+        img.addEventListener("click", () => {
+            const modal = document.createElement("div");
+            modal.style.position = "fixed";
+            modal.style.top = "0";
+            modal.style.left = "0";
+            modal.style.width = "100%";
+            modal.style.height = "100%";
+            modal.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+            modal.style.display = "flex";
+            modal.style.justifyContent = "center";
+            modal.style.alignItems = "center";
+            modal.style.zIndex = "1000";
+
+            const modalImg = document.createElement("img");
+            modalImg.src = img.src;
+            modalImg.style.maxWidth = "90%";
+            modalImg.style.maxHeight = "90%";
+            modalImg.style.boxShadow = "0 0 20px rgba(0, 0, 0, 0.5)";
+            modal.appendChild(modalImg);
+
+            modal.addEventListener("click", () => {
+                document.body.removeChild(modal);
+            });
+
+            document.body.appendChild(modal);
+        });
+    } else if (["text/plain", "application/json", "text/csv"].includes(file.type)) {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const textPreview = document.createElement("pre");
+            textPreview.textContent = reader.result.substring(0, 500);
+            textPreview.className = "mt-2 border p-2 bg-light";
+            preview.appendChild(textPreview);
+        };
+        reader.readAsText(file);
+    } else {
+        preview.innerHTML = `<p class="text-danger mt-2">ไม่สามารถแสดงตัวอย่างไฟล์นี้ได้</p>`;
+    }
+});

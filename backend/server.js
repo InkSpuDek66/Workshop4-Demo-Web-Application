@@ -3,6 +3,8 @@ const multer = require("multer");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
+const cors = require("cors");
+const moment = require("moment");
 
 const app = express();
 const port = 3000;
@@ -14,29 +16,35 @@ app.use(express.json());
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
 const storage = multer.diskStorage({
-    destination: uploadDir,
-    filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`);
-    },
+  destination: "uploads/",
+  filename: (req, file, cb) => {
+    cb(null, `[${moment().format("YYYY-MM-DD_HH-mm-ss")}]-${file.originalname}`);
+  }
 });
 
 const upload = multer({ storage });
 
-let fileDB = [];
-
+// อัปโหลดไฟล์
 app.post("/upload", upload.single("file"), (req, res) => {
-    const { owner } = req.body;
-    if (!req.file || !owner) {
-        return res.status(400).json({ message: "อัปโหลดไฟล์ล้มเหลว!" });
-    }
-
-    const newFile = { name: req.file.filename, owner };
-    fileDB.push(newFile);
-    res.json({ message: "อัปโหลดไฟล์สำเร็จ!" });
+  const { username } = req.body;
+  const fileData = {
+    filename: req.file.filename,
+    username: username
+  };
+  fs.writeFileSync(`uploads/${req.file.filename}.json`, JSON.stringify(fileData));
+  res.json({ message: "Upload successful", filename: req.file.filename });
 });
 
+// ดึงรายการไฟล์
 app.get("/files", (req, res) => {
-    res.json(fileDB);
+  fs.readdir("uploads", (err, files) => {
+    if (err) return res.status(500).json({ message: "Error retrieving files" });
+    const fileList = files.filter(file => !file.endsWith('.json')).map(file => {
+      const fileData = JSON.parse(fs.readFileSync(`uploads/${file}.json`));
+      return fileData;
+    });
+    res.json(fileList);
+  });
 });
 
 app.get("/download/:filename", (req, res) => {
@@ -50,38 +58,15 @@ app.get("/download/:filename", (req, res) => {
 });
 
 app.delete("/delete/:filename", (req, res) => {
-  const { filename } = req.params;
-  const { username } = req.body;  // ดึงค่า username ที่ส่งมาจาก frontend
-
-  if (!username) {
-      return res.status(400).json({ message: "ไม่ได้ระบุชื่อผู้ใช้!" });
-  }
-
-  const fileIndex = fileDB.findIndex(file => file.name === filename);
-  if (fileIndex === -1) {
-      return res.status(404).json({ message: "ไม่พบไฟล์!" });
-  }
-
-  const file = fileDB[fileIndex];
-
-  // ตรวจสอบสิทธิ์การลบไฟล์
-  const isAdmin = username === "admin";
-  const isUser1 = username === "user1";
-  const isOwner = file.owner === username;
-  const isFileByAdmin = file.owner === "admin";
-
-  if (!(isOwner || (isUser1 && !isFileByAdmin) || isAdmin)) {
-      return res.status(403).json({ message: "คุณไม่มีสิทธิ์ลบไฟล์นี้!" });
-  }
-
-  // ลบไฟล์ออกจากระบบ
-  const filePath = path.join(uploadDir, filename);
-  if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-  }
-
-  fileDB.splice(fileIndex, 1);
-  res.json({ message: "ลบไฟล์สำเร็จ!" });
+  const filePath = path.join("uploads", req.params.filename);
+  fs.unlink(filePath, (err) => {
+    if (err) return res.status(500).json({ message: "Error deleting file" });
+    res.json({ message: "File deleted" });
+  });
+  fs.unlink(`${filePath}.json`, (err) => {
+    if (err) return res.status(500).json({ message: "Error deleting file" });
+    res.json({ message: "File deleted" });
+  });
 });
 
 
