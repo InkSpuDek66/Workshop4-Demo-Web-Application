@@ -98,13 +98,21 @@ async function deleteFile(filename) {
     try {
         const res = await fetch(`${API_URL}/delete/${filename}`, {
             method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username: user.username })
+            headers: { 
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ username: user.username }) // ส่ง username ไปให้ Backend
         });
+
         const data = await res.json();
-        alert(data.message);
-        loadFiles();
+        if (res.ok) {
+            alert(data.message);
+            loadFiles();
+        } else {
+            alert(`ลบไฟล์ไม่สำเร็จ: ${data.message}`);
+        }
     } catch (err) {
         console.error("Delete Error:", err);
     }
 }
+

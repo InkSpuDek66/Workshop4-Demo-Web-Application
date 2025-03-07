@@ -50,28 +50,39 @@ app.get("/download/:filename", (req, res) => {
 });
 
 app.delete("/delete/:filename", (req, res) => {
-    const { filename } = req.params;
-    const { username } = req.body;
+  const { filename } = req.params;
+  const { username } = req.body;  // ดึงค่า username ที่ส่งมาจาก frontend
 
-    const fileIndex = fileDB.findIndex(file => file.name === filename);
-    if (fileIndex === -1) return res.status(404).json({ message: "ไม่พบไฟล์!" });
+  if (!username) {
+      return res.status(400).json({ message: "ไม่ได้ระบุชื่อผู้ใช้!" });
+  }
 
-    const file = fileDB[fileIndex];
+  const fileIndex = fileDB.findIndex(file => file.name === filename);
+  if (fileIndex === -1) {
+      return res.status(404).json({ message: "ไม่พบไฟล์!" });
+  }
 
-    const isAdmin = username === "admin";
-    const isUser1 = username === "user1";
-    const isOwner = file.owner === username;
-    const isFileByAdmin = file.owner === "admin";
+  const file = fileDB[fileIndex];
 
-    if (!(isOwner || (isUser1 && !isFileByAdmin) || isAdmin)) {
-        return res.status(403).json({ message: "คุณไม่มีสิทธิ์ลบไฟล์นี้!" });
-    }
+  // ตรวจสอบสิทธิ์การลบไฟล์
+  const isAdmin = username === "admin";
+  const isUser1 = username === "user1";
+  const isOwner = file.owner === username;
+  const isFileByAdmin = file.owner === "admin";
 
-    const filePath = path.join(uploadDir, filename);
-    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  if (!(isOwner || (isUser1 && !isFileByAdmin) || isAdmin)) {
+      return res.status(403).json({ message: "คุณไม่มีสิทธิ์ลบไฟล์นี้!" });
+  }
 
-    fileDB.splice(fileIndex, 1);
-    res.json({ message: "ลบไฟล์สำเร็จ!" });
+  // ลบไฟล์ออกจากระบบ
+  const filePath = path.join(uploadDir, filename);
+  if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+  }
+
+  fileDB.splice(fileIndex, 1);
+  res.json({ message: "ลบไฟล์สำเร็จ!" });
 });
+
 
 app.listen(port, () => console.log(`Server running on port ${port}`));
