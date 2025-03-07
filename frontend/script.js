@@ -136,7 +136,7 @@ async function loadFiles() {
             li.className = "list-group-item d-flex justify-content-between align-items-center";
             li.innerHTML = `
                 ${file.filename} ( อัปโหลดโดย : ${file.username})
-                <div style="display: flex; gap: 5px;">  
+                <div>
                     <button class="btn btn-primary btn-sm" onclick="handleDownloadCooldown(this, '${file.filename}')">ดาวน์โหลด</button>
                     ${isOwner ? `<button class="btn btn-danger btn-sm" onclick="deleteFile('${file.filename}')">ลบ</button>` : ''}
                 </div>
