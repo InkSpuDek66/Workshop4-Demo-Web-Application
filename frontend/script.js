@@ -117,6 +117,20 @@ async function deleteFile(filename) {
     }
 }
 
+// ฟังก์ชันลบไฟล์
+async function deleteFile(filename) {
+    if (!confirm(`คุณต้องการลบไฟล์ ${filename} หรือไม่?`)) return;
+
+    try {
+        const res = await fetch(`${API_URL}/delete/${filename}`, { method: "DELETE" });
+        const data = await res.json();
+        alert(data.message);
+        loadFiles();
+    } catch (err) {
+        console.error("Delete Error:", err);
+    }
+}
+
 // ฟังก์ชันแสดงตัวอย่างไฟล์ก่อนอัปโหลด
 document.getElementById("fileInput").addEventListener("change", () => {
     const fileInput = document.getElementById("fileInput");
