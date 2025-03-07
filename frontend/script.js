@@ -115,11 +115,9 @@ function logout() {
 async function uploadFile() {
     const fileInput = document.getElementById("fileInput");
     if (!fileInput.files.length) return alert("กรุณาเลือกไฟล์!");
-    if (!user) return alert("กรุณาเข้าสู่ระบบ!");
 
     const formData = new FormData();
     formData.append("file", fileInput.files[0]);
-    formData.append("owner", user.username);
 
     const user = JSON.parse(localStorage.getItem("user"));
     formData.append("username", user.username); // Add username to formData
@@ -217,7 +215,7 @@ async function deleteFile(filename) {
 
         const data = await res.json();
         if (res.ok) {
-            alert(data.message);
+t(data.message);
             loadFiles();
         } else {
             alert(`ลบไฟล์ไม่สำเร็จ: ${data.message}`);

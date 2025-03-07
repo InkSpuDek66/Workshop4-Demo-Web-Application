@@ -3,7 +3,6 @@ const multer = require("multer");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
-const cors = require("cors");
 const moment = require("moment");
 
 const app = express();
