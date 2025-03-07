@@ -1,11 +1,13 @@
 const port = 3000;
-const host = 'localhost'; 
-const API_URL = `http://${host}:${port}`;
+const host = 'localhost'; //192.168.5.23
+const API_URL = `http://${host}:${port}`; // URL ของ Backend
 console.log(API_URL);
 
+// ตรวจสอบการล็อกอินเมื่อหน้าโหลด
 document.addEventListener("DOMContentLoaded", () => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (user) {
+        console.log(`สวัสดีคุณ ${user.username}!`);
         document.getElementById("loginSection").classList.add("d-none");
         document.getElementById("fileSection").classList.remove("d-none");
         document.getElementById("userDisplay").innerText = `สวัสดีคุณ ${user.username}`;
@@ -26,6 +28,7 @@ function login() {
     const username = usernameInput.value;
     const password = passwordInput.value;
 
+    // Mock Data (ผู้ใช้ที่ถูกต้อง)
     const validUsers = { "admin": "1234", "user1": "password1", "user2": "password2" };
 
     if (lockoutTimeout) {
@@ -90,15 +93,13 @@ function logout() {
     location.reload();
 }
 
+// ฟังก์ชันอัปโหลดไฟล์
 async function uploadFile() {
     const fileInput = document.getElementById("fileInput");
     if (!fileInput.files.length) return alert("กรุณาเลือกไฟล์!");
 
     const formData = new FormData();
     formData.append("file", fileInput.files[0]);
-
-    const user = JSON.parse(localStorage.getItem("user"));
-    formData.append("username", user.username); // Add username to formData
 
     try {
         const res = await fetch(`${API_URL}/upload`, { method: "POST", body: formData });
@@ -119,9 +120,6 @@ function cancelUpload() {
 
 // ฟังก์ชันโหลดรายการไฟล์
 async function loadFiles() {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (!user) return;
-
     try {
         const res = await fetch(`${API_URL}/files`);
         const files = await res.json();
@@ -130,15 +128,13 @@ async function loadFiles() {
         fileList.innerHTML = "";
 
         files.forEach(file => {
-            const isOwner = file.username === user.username;
-
             const li = document.createElement("li");
             li.className = "list-group-item d-flex justify-content-between align-items-center";
             li.innerHTML = `
-                ${file.filename} ( อัปโหลดโดย : ${file.username})
+                ${file}
                 <div>
-                    <button class="btn btn-primary btn-sm" onclick="handleDownloadCooldown(this, '${file.filename}')">ดาวน์โหลด</button>
-                    ${isOwner ? `<button class="btn btn-danger btn-sm" onclick="deleteFile('${file.filename}')">ลบ</button>` : ''}
+                    <button class="btn btn-primary btn-sm" onclick="handleDownloadCooldown(this, '${file}')">ดาวน์โหลด</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteFile('${file}')">ลบ</button>
                 </div>
             `;
             fileList.appendChild(li);
@@ -185,35 +181,13 @@ function closeModal() {
 
 // ฟังก์ชันลบไฟล์
 async function deleteFile(filename) {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (!user) return alert("กรุณาเข้าสู่ระบบ!");
+    if (!confirm(`คุณต้องการลบไฟล์ ${filename} หรือไม่?`)) return;
 
     try {
-        const res = await fetch(`${API_URL}/files`);
-        const files = await res.json();
-        const file = files.find(f => f.filename === filename);
-
-        if (file.username !== user.username) {
-            return alert("คุณไม่มีสิทธิ์ลบไฟล์นี้!");
-        }
-
-        if (!confirm(`คุณต้องการลบไฟล์ ${filename} หรือไม่?`)) return;
-
-        const deleteRes = await fetch(`${API_URL}/delete/${filename}`, {
-            method: "DELETE",
-            headers: { 
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ username: user.username }) // ส่ง username ไปให้ Backend
-        });
-
-        const data = await deleteRes.json();
-        if (deleteRes.ok) {
-            alert(data.message);
-            loadFiles();
-        } else {
-            alert(`ลบไฟล์ไม่สำเร็จ: ${data.message}`);
-        }
+        const res = await fetch(`${API_URL}/delete/${filename}`, { method: "DELETE" });
+        const data = await res.json();
+        alert(data.message);
+        loadFiles();
     } catch (err) {
         console.error("Delete Error:", err);
     }
