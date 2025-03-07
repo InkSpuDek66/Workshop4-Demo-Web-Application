@@ -60,6 +60,10 @@ app.delete("/delete/:filename", (req, res) => {
     if (err) return res.status(500).json({ message: "Error deleting file" });
     res.json({ message: "File deleted" });
   });
+  fs.unlink(`${filePath}.json`, (err) => {
+    if (err) return res.status(500).json({ message: "Error deleting file" });
+    res.json({ message: "File deleted" });
+  });
 });
 
 app.listen(port, host, () => {
