@@ -57,18 +57,27 @@ app.get("/download/:filename", (req, res) => {
 });
 
 app.delete("/delete/:filename", (req, res) => {
-  const filePath = path.join("uploads", req.params.filename);
-  const jsonFilePath = `${filePath}.json`;
+    const { username } = req.body;
+    const filePath = path.join("uploads", req.params.filename);
+    const jsonFilePath = `${filePath}.json`;
 
-  fs.unlink(filePath, (err) => {
-    if (err) return res.status(500).json({ message: "Error deleting file" });
+    if (!fs.existsSync(jsonFilePath)) {
+        return res.status(404).json({ message: "ไม่พบไฟล์!" });
+    }
 
-    fs.unlink(jsonFilePath, (err) => {
-      if (err) return res.status(500).json({ message: "Error deleting file metadata" });
-      res.json({ message: "File deleted" });
+    const fileData = JSON.parse(fs.readFileSync(jsonFilePath));
+    if (fileData.username !== username) {
+        return res.status(403).json({ message: "คุณไม่มีสิทธิ์ลบไฟล์นี้!" });
+    }
+
+    fs.unlink(filePath, (err) => {
+        if (err) return res.status(500).json({ message: "Error deleting file" });
+
+        fs.unlink(jsonFilePath, (err) => {
+            if (err) return res.status(500).json({ message: "Error deleting file metadata" });
+            res.json({ message: "File deleted" });
+        });
     });
-  });
 });
-
 
 app.listen(port, () => console.log(`Server running on port ${port}`));

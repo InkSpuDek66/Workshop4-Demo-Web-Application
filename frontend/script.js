@@ -152,12 +152,7 @@ async function loadFiles() {
         fileList.innerHTML = "";
 
         files.forEach(file => {
-            const isOwner = file.owner === user.username;
-            const isAdmin = user.username === "admin";
-            const isUser1 = user.username === "user1";
-            const isFileByAdmin = file.owner === "admin";
-
-            const canDelete = isOwner || (isUser1 && !isFileByAdmin) || isAdmin;
+            const isOwner = file.username === user.username;
 
             const li = document.createElement("li");
             li.className = "list-group-item d-flex justify-content-between align-items-center";
@@ -165,7 +160,7 @@ async function loadFiles() {
                 ${file.filename} ( อัปโหลดโดย : ${file.username})
                 <div>
                     <button class="btn btn-primary btn-sm" onclick="handleDownloadCooldown(this, '${file.filename}')">ดาวน์โหลด</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteFile('${file.filename}')">ลบ</button>
+                    ${isOwner ? `<button class="btn btn-danger btn-sm" onclick="deleteFile('${file.filename}')">ลบ</button>` : ''}
                 </div>
             `;
             fileList.appendChild(li);
@@ -199,13 +194,21 @@ function handleDownloadCooldown(button, file) {
 
 // ฟังก์ชันลบไฟล์
 async function deleteFile(filename) {
-    if (!confirm(`คุณต้องการลบไฟล์ ${filename} หรือไม่?`)) return;
-
     const user = JSON.parse(localStorage.getItem("user"));
     if (!user) return alert("กรุณาเข้าสู่ระบบ!");
 
     try {
-        const res = await fetch(`${API_URL}/delete/${filename}`, {
+        const res = await fetch(`${API_URL}/files`);
+        const files = await res.json();
+        const file = files.find(f => f.filename === filename);
+
+        if (file.username !== user.username) {
+            return alert("คุณไม่มีสิทธิ์ลบไฟล์นี้!");
+        }
+
+        if (!confirm(`คุณต้องการลบไฟล์ ${filename} หรือไม่?`)) return;
+
+        const deleteRes = await fetch(`${API_URL}/delete/${filename}`, {
             method: "DELETE",
             headers: { 
                 "Content-Type": "application/json"
@@ -213,9 +216,9 @@ async function deleteFile(filename) {
             body: JSON.stringify({ username: user.username }) // ส่ง username ไปให้ Backend
         });
 
-        const data = await res.json();
-        if (res.ok) {
-t(data.message);
+        const data = await deleteRes.json();
+        if (deleteRes.ok) {
+            alert(data.message);
             loadFiles();
         } else {
             alert(`ลบไฟล์ไม่สำเร็จ: ${data.message}`);
