@@ -77,7 +77,7 @@ async function loadFiles() {
             li.innerHTML = `
                 ${file}
                 <div>
-                    <a href="${API_URL}/download/${file}" class="btn btn-primary btn-sm">ดาวน์โหลด</a>
+                    <button class="btn btn-primary btn-sm" onclick="handleDownloadCooldown(this, '${file}')">ดาวน์โหลด</button>
                     <button class="btn btn-danger btn-sm" onclick="deleteFile('${file}')">ลบ</button>
                 </div>
             `;
@@ -86,6 +86,28 @@ async function loadFiles() {
     } catch (err) {
         console.error("Load Files Error:", err);
     }
+}
+
+// ฟังก์ชันคูลดาวน์หลังโหลดไฟล์
+function handleDownloadCooldown(button, file) {
+    let cooldown = 5;
+    button.disabled = true; // ปิดใช้งานปุ่มทันที
+    button.textContent = `รอ ${cooldown} วินาที...`;
+
+    // เริ่มนับถอยหลังทันที
+    const interval = setInterval(() => {
+        cooldown--;
+        if (cooldown > 0) {
+            button.textContent = `รอ ${cooldown} วินาที...`;
+        } else {
+            clearInterval(interval);
+            button.textContent = "ดาวน์โหลด";
+            button.disabled = false; // เปิดใช้งานปุ่มอีกครั้ง
+        }
+    }, 1000);
+
+    // เริ่มดาวน์โหลดไฟล์ทันทีที่กดปุ่ม
+    window.location.href = `${API_URL}/download/${file}`;
 }
 
 // ฟังก์ชันลบไฟล์
