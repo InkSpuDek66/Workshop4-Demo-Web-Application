@@ -21,7 +21,10 @@
             <label for="password" class="form-label"><b>รหัสผ่าน</b></label>
             <input type="password" class="form-control" id="password" placeholder="กรอกรหัสผ่าน" style="margin-bottom: 30px;">
         </div>
-        <button class="btn btn-primary w-100" onclick="login()"><b>เข้าสู่ระบบ</b></button>
+        <button id="login"class="btn btn-primary w-100" onclick="login()"><b>เข้าสู่ระบบ</b></button>
+        </div>
+       
+            <div id="cooldownLabel" class="text-danger text-center mt-3 d-none"><b>กรุณารอ <span id="cooldownTime">3</span> วินาที</b></div>
         </div>
     </div>
 

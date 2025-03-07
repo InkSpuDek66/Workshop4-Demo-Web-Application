@@ -21,6 +21,9 @@ let lockoutTimeout;
 function login() {
     const usernameInput = document.getElementById("username");
     const passwordInput = document.getElementById("password");
+    const login = document.getElementById("login");
+    const cooldownLabel = document.getElementById("cooldownLabel");
+    const cooldownTime = document.getElementById("cooldownTime");
     const username = usernameInput.value;
     const password = passwordInput.value;
 
@@ -52,16 +55,29 @@ function login() {
             passwordInput.disabled = true;
             usernameInput.classList.add("cooldown");
             passwordInput.classList.add("cooldown");
+            login.classList.add("cooldown");
+            cooldownLabel.classList.remove("d-none");
 
-            lockoutTimeout = setTimeout(() => {
-                failedAttempts = 0;
-                lockoutTimeout = null;
-                usernameInput.disabled = false;
-                passwordInput.disabled = false;
-                usernameInput.classList.remove("cooldown");
-                passwordInput.classList.remove("cooldown");
-                location.reload(); // Refresh the page
-            }, 3000);
+            let remainingTime = 3;
+            cooldownTime.textContent = remainingTime;
+
+            lockoutTimeout = setInterval(() => {
+                remainingTime--;
+                cooldownTime.textContent = remainingTime;
+
+                if (remainingTime <= 0) {
+                    clearInterval(lockoutTimeout);
+                    lockoutTimeout = null;
+                    failedAttempts = 0;
+                    usernameInput.disabled = false;
+                    passwordInput.disabled = false;
+                    usernameInput.classList.remove("cooldown");
+                    passwordInput.classList.remove("cooldown");
+                    login.classList.remove("cooldown");
+                    cooldownLabel.classList.add("d-none");
+                    location.reload(); // Refresh the page
+                }
+            }, 1000);
         } else {
             alert(`ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง! ครั้งที่ ${failedAttempts}`);
         }
