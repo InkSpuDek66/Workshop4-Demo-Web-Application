@@ -28,7 +28,7 @@ app.post("/upload", upload.single("file"), (req, res) => {
   res.json({ message: "Upload successful", filename: req.file.filename });
 });
 
-// รับรายการไฟล์
+// ดึงรายการไฟล์
 app.get("/files", (req, res) => {
   fs.readdir("uploads", (err, files) => {
     if (err) return res.status(500).json({ message: "Error retrieving files" });
@@ -54,6 +54,3 @@ app.delete("/delete/:filename", (req, res) => {
 app.listen(port, host, () => {
   console.log(`Server is running on http://${host}:${port}`);
 })
-
-
-//ggwp
