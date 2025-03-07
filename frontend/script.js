@@ -14,6 +14,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
+let failedAttempts = 0;
+let lockoutTimeout;
+
 // ฟังก์ชันล็อกอิน
 function login() {
     const username = document.getElementById("username").value;
@@ -22,7 +25,13 @@ function login() {
     // Mock Data (ผู้ใช้ที่ถูกต้อง)
     const validUsers = { "admin": "1234", "user1": "password1", "user2": "password2" };
 
+    if (lockoutTimeout) {
+        alert("คุณล็อกอินผิดพลาดเกิน 3 ครั้ง กรุณารอ 3 วินาทีแล้วลองใหม่อีกครั้ง");
+        return;
+    }
+
     if (validUsers[username] && validUsers[username] === password) {
+        failedAttempts = 0; // Reset failed attempts on successful login
         const lastLogin = new Date().toLocaleString();
         localStorage.setItem("user", JSON.stringify({ username, lastLogin }));
 
@@ -34,7 +43,17 @@ function login() {
         console.log("ชื่อผู้ใช้:", username);
         console.log("เวลาล่าสุดที่เข้าใช้:", lastLogin);
     } else {
-        alert("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!");
+        failedAttempts++;
+        if (failedAttempts >= 3) {
+            alert("คุณล็อกอินผิดพลาดเกิน 3 ครั้ง กรุณารอ 3 วินาทีแล้วลองใหม่อีกครั้ง");
+            lockoutTimeout = setTimeout(() => {
+                failedAttempts = 0;
+                lockoutTimeout = null;
+                location.reload(); // Refresh the page
+            }, 3000);
+        } else {
+            alert("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!");
+        }
     }
 }
 
