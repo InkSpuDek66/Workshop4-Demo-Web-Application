@@ -105,7 +105,7 @@ function handleDownloadCooldown(button, file) {
             button.disabled = false; // เปิดใช้งานปุ่มอีกครั้ง
         }
     }, 1000);
-
+//ขอให้รวยๆ
     // เริ่มดาวน์โหลดไฟล์ทันทีที่กดปุ่ม
     window.location.href = `${API_URL}/download/${file}`;
 
