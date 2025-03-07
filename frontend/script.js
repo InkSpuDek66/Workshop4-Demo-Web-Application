@@ -101,12 +101,6 @@ function countFailedLogin() {
     }, 3000);
 }
 
-// Event listener for modal OK button
-document.getElementById("modalOkButton").addEventListener("click", () => {
-    const lockoutModal = bootstrap.Modal.getInstance(document.getElementById('lockoutModal'));
-    lockoutModal.hide();
-    location.reload(); // Refresh the page
-});
 
 // ฟังก์ชันออกจากระบบ
 function logout() {
