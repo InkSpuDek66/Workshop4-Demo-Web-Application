@@ -47,7 +47,7 @@ function login() {
         if (failedAttempts >= 3) {
             countFailedLogin();
         } else {
-            alert(`ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!ครั้งที่:${failedAttempts}`);
+            alert(`ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง! ครั้งที่ : ${failedAttempts}`);
         }
     }
 }
@@ -56,7 +56,7 @@ function countFailedLogin() {
     const loginButton = document.querySelector("button[onclick='login()']");
     const usernameInput = document.getElementById("username");
     const passwordInput = document.getElementById("password");
-    const loginAgainLabel = document.getElementById("loginAgainLabel");
+    const loginAgain = document.getElementById("loginAgain");
     const countdown = document.getElementById("countdown");
 
     loginButton.disabled = true;
@@ -68,7 +68,7 @@ function countFailedLogin() {
     usernameInput.classList.add("bg-secondary");
     passwordInput.classList.add("bg-secondary");
 
-    loginAgainLabel.classList.remove("d-none");
+    loginAgain.classList.remove("d-none");
 
     let timeLeft = 3;
     countdown.textContent = timeLeft;
@@ -78,7 +78,7 @@ function countFailedLogin() {
         countdown.textContent = timeLeft;
         if (timeLeft <= 0) {
             clearInterval(countdownInterval);
-            loginAgainLabel.classList.add("d-none");
+            loginAgain.classList.add("d-none");
         }
     }, 1000);
 
