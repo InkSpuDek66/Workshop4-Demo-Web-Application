@@ -47,10 +47,13 @@ function logout() {
 // ฟังก์ชันอัปโหลดไฟล์
 async function uploadFile() {
     const fileInput = document.getElementById("fileInput");
+    const user = JSON.parse(localStorage.getItem("user"));
     if (!fileInput.files.length) return alert("กรุณาเลือกไฟล์!");
+    if (!user) return alert("กรุณาเข้าสู่ระบบ!");
 
     const formData = new FormData();
     formData.append("file", fileInput.files[0]);
+    formData.append("owner", user.username); // ส่งชื่อผู้ใช้ไปยังเซิร์ฟเวอร์
 
     try {
         const res = await fetch(`${API_URL}/upload`, { method: "POST", body: formData });
@@ -64,6 +67,9 @@ async function uploadFile() {
 
 // ฟังก์ชันโหลดรายการไฟล์
 async function loadFiles() {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) return;
+
     try {
         const res = await fetch(`${API_URL}/files`);
         const files = await res.json();
@@ -75,10 +81,12 @@ async function loadFiles() {
             const li = document.createElement("li");
             li.className = "list-group-item d-flex justify-content-between align-items-center";
             li.innerHTML = `
-                ${file}
+                ${file.name} (โดย ${file.owner})
                 <div>
-                    <a href="${API_URL}/download/${file}" class="btn btn-primary btn-sm">ดาวน์โหลด</a>
-                    <button class="btn btn-danger btn-sm" onclick="deleteFile('${file}')">ลบ</button>
+                    <a href="${API_URL}/download/${file.name}" class="btn btn-primary btn-sm">ดาวน์โหลด</a>
+                    ${file.owner === user.username 
+                        ? `<button class="btn btn-danger btn-sm ms-2" onclick="deleteFile('${file.name}')">ลบ</button>` 
+                        : ''}
                 </div>
             `;
             fileList.appendChild(li);
@@ -88,12 +96,19 @@ async function loadFiles() {
     }
 }
 
-// ฟังก์ชันลบไฟล์
+// ฟังก์ชันลบไฟล์ (เฉพาะเจ้าของ)
 async function deleteFile(filename) {
     if (!confirm(`คุณต้องการลบไฟล์ ${filename} หรือไม่?`)) return;
+    
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) return alert("กรุณาเข้าสู่ระบบ!");
 
     try {
-        const res = await fetch(`${API_URL}/delete/${filename}`, { method: "DELETE" });
+        const res = await fetch(`${API_URL}/delete/${filename}`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: user.username }) // ส่งชื่อผู้ใช้ไปตรวจสอบที่ Backend
+        });
         const data = await res.json();
         alert(data.message);
         loadFiles();
