@@ -63,6 +63,13 @@ async function uploadFile() {
     }
 }
 
+// ฟังก์ชันยกเลิกการอัปโหลดไฟล์
+function cancelUpload() {
+    const fileInput = document.getElementById("fileInput");
+    fileInput.value = "";
+    document.getElementById("preview").innerHTML = "";
+}
+
 // ฟังก์ชันโหลดรายการไฟล์
 async function loadFiles() {
     try {
@@ -118,6 +125,34 @@ document.getElementById("fileInput").addEventListener("change", () => {
         img.style.maxWidth = "200px";
         img.className = "mt-2 img-thumbnail";
         preview.appendChild(img);
+
+        // เพิ่ม event listener สำหรับการคลิกที่ภาพ
+        img.addEventListener("click", () => {
+            const modal = document.createElement("div");
+            modal.style.position = "fixed";
+            modal.style.top = "0";
+            modal.style.left = "0";
+            modal.style.width = "100%";
+            modal.style.height = "100%";
+            modal.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+            modal.style.display = "flex";
+            modal.style.justifyContent = "center";
+            modal.style.alignItems = "center";
+            modal.style.zIndex = "1000";
+
+            const modalImg = document.createElement("img");
+            modalImg.src = img.src;
+            modalImg.style.maxWidth = "90%";
+            modalImg.style.maxHeight = "90%";
+            modalImg.style.boxShadow = "0 0 20px rgba(0, 0, 0, 0.5)";
+            modal.appendChild(modalImg);
+
+            modal.addEventListener("click", () => {
+                document.body.removeChild(modal);
+            });
+
+            document.body.appendChild(modal);
+        });
     } else if (["text/plain", "application/json", "text/csv"].includes(file.type)) {
         const reader = new FileReader();
         reader.onload = () => {
