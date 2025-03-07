@@ -11,7 +11,6 @@ const uploadDir = "./uploads";
 app.use(cors());
 app.use(express.json());
 
-// ตรวจสอบว่าโฟลเดอร์ uploads มีอยู่หรือไม่ ถ้าไม่มีให้สร้าง
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
 const storage = multer.diskStorage({
@@ -23,10 +22,8 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// เก็บข้อมูลไฟล์
 let fileDB = [];
 
-// อัปโหลดไฟล์
 app.post("/upload", upload.single("file"), (req, res) => {
     const { owner } = req.body;
     if (!req.file || !owner) {
@@ -38,12 +35,10 @@ app.post("/upload", upload.single("file"), (req, res) => {
     res.json({ message: "อัปโหลดไฟล์สำเร็จ!" });
 });
 
-// รับรายการไฟล์
 app.get("/files", (req, res) => {
     res.json(fileDB);
 });
 
-// ดาวน์โหลดไฟล์
 app.get("/download/:filename", (req, res) => {
     const filename = req.params.filename;
     const filePath = path.join(uploadDir, filename);
@@ -54,7 +49,6 @@ app.get("/download/:filename", (req, res) => {
     }
 });
 
-// ลบไฟล์ (ตรวจสอบเจ้าของ)
 app.delete("/delete/:filename", (req, res) => {
     const { filename } = req.params;
     const { username } = req.body;
@@ -63,7 +57,15 @@ app.delete("/delete/:filename", (req, res) => {
     if (fileIndex === -1) return res.status(404).json({ message: "ไม่พบไฟล์!" });
 
     const file = fileDB[fileIndex];
-    if (file.owner !== username) return res.status(403).json({ message: "คุณไม่มีสิทธิ์ลบไฟล์นี้!" });
+
+    const isAdmin = username === "admin";
+    const isUser1 = username === "user1";
+    const isOwner = file.owner === username;
+    const isFileByAdmin = file.owner === "admin";
+
+    if (!(isOwner || (isUser1 && !isFileByAdmin) || isAdmin)) {
+        return res.status(403).json({ message: "คุณไม่มีสิทธิ์ลบไฟล์นี้!" });
+    }
 
     const filePath = path.join(uploadDir, filename);
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
