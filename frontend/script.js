@@ -162,7 +162,13 @@ function handleDownloadCooldown(button, file) {
 
     // เริ่มดาวน์โหลดไฟล์ทันทีที่กดปุ่ม
     window.location.href = `${API_URL}/download/${file}`;
+
+    // แจ้งเตือนหลังจากสั่งดาวน์โหลด (ดีเลย์เล็กน้อยเพื่อให้แน่ใจว่าเริ่มดาวน์โหลดแล้ว)
+    setTimeout(() => {
+        alert("ดาวน์โหลดสำเร็จ!");
+    }); 
 }
+
 
 // ฟังก์ชันลบไฟล์
 async function deleteFile(filename) {
