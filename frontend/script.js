@@ -45,56 +45,60 @@ function login() {
     } else {
         failedAttempts++;
         if (failedAttempts >= 3) {
-            const loginButton = document.querySelector("button[onclick='login()']");
-            const usernameInput = document.getElementById("username");
-            const passwordInput = document.getElementById("password");
-            const loginAgainLabel = document.getElementById("loginAgainLabel");
-            const countdown = document.getElementById("countdown");
-
-            loginButton.disabled = true;
-            loginButton.classList.add("btn-secondary");
-            loginButton.classList.remove("btn-primary");
-
-            usernameInput.disabled = true;
-            passwordInput.disabled = true;
-            usernameInput.classList.add("bg-secondary");
-            passwordInput.classList.add("bg-secondary");
-
-            loginAgainLabel.classList.remove("d-none");
-
-            let timeLeft = 3;
-            countdown.textContent = timeLeft;
-
-            const countdownInterval = setInterval(() => {
-                timeLeft--;
-                countdown.textContent = timeLeft;
-                if (timeLeft <= 0) {
-                    clearInterval(countdownInterval);
-                    loginAgainLabel.classList.add("d-none");
-                }
-            }, 1000);
-
-            alert("คุณล็อกอินผิดพลาดเกิน 3 ครั้ง กรุณารอ 3 วินาทีแล้วลองใหม่อีกครั้ง");
-
-            lockoutTimeout = setTimeout(() => {
-                failedAttempts = 0;
-                lockoutTimeout = null;
-
-                loginButton.disabled = false;
-                loginButton.classList.remove("btn-secondary");
-                loginButton.classList.add("btn-primary");
-
-                usernameInput.disabled = false;
-                passwordInput.disabled = false;
-                usernameInput.classList.remove("bg-secondary");
-                passwordInput.classList.remove("bg-secondary");
-
-                location.reload(); // Refresh the page
-            }, 3000);
+            countFailedLogin();
         } else {
             alert(`ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!ครั้งที่:${failedAttempts}`);
         }
     }
+}
+
+function countFailedLogin() {
+    const loginButton = document.querySelector("button[onclick='login()']");
+    const usernameInput = document.getElementById("username");
+    const passwordInput = document.getElementById("password");
+    const loginAgainLabel = document.getElementById("loginAgainLabel");
+    const countdown = document.getElementById("countdown");
+
+    loginButton.disabled = true;
+    loginButton.classList.add("btn-secondary");
+    loginButton.classList.remove("btn-primary");
+
+    usernameInput.disabled = true;
+    passwordInput.disabled = true;
+    usernameInput.classList.add("bg-secondary");
+    passwordInput.classList.add("bg-secondary");
+
+    loginAgainLabel.classList.remove("d-none");
+
+    let timeLeft = 3;
+    countdown.textContent = timeLeft;
+
+    const countdownInterval = setInterval(() => {
+        timeLeft--;
+        countdown.textContent = timeLeft;
+        if (timeLeft <= 0) {
+            clearInterval(countdownInterval);
+            loginAgainLabel.classList.add("d-none");
+        }
+    }, 1000);
+
+    alert("คุณล็อกอินผิดพลาดเกิน 3 ครั้ง กรุณารอ 3 วินาทีแล้วลองใหม่อีกครั้ง");
+
+    lockoutTimeout = setTimeout(() => {
+        failedAttempts = 0;
+        lockoutTimeout = null;
+
+        loginButton.disabled = false;
+        loginButton.classList.remove("btn-secondary");
+        loginButton.classList.add("btn-primary");
+
+        usernameInput.disabled = false;
+        passwordInput.disabled = false;
+        usernameInput.classList.remove("bg-secondary");
+        passwordInput.classList.remove("bg-secondary");
+
+        location.reload(); // Refresh the page
+    }, 3000);
 }
 
 // Event listener for modal OK button
