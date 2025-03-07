@@ -109,11 +109,18 @@ function handleDownloadCooldown(button, file) {
     // เริ่มดาวน์โหลดไฟล์ทันทีที่กดปุ่ม
     window.location.href = `${API_URL}/download/${file}`;
 
-    // แจ้งเตือนหลังจากสั่งดาวน์โหลด 
+    // แสดง Modal แจ้งเตือนหลังจากสั่งดาวน์โหลด
     setTimeout(() => {
-        alert("ดาวน์โหลดสำเร็จ!");
-    }); 
+        const modal = new bootstrap.Modal(document.getElementById('downloadSuccessModal'));
+        modal.show();
+    });
 }
+
+
+function closeModal() {
+    document.getElementById("downloadSuccessModal").style.display = "none";
+}
+
 
 
 // ฟังก์ชันลบไฟล์
