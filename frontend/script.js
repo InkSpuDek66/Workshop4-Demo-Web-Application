@@ -165,15 +165,22 @@ function handleDownloadCooldown(button, file) {
             button.disabled = false; // เปิดใช้งานปุ่มอีกครั้ง
         }
     }, 1000);
-
+//ขอให้รวยๆ
     // เริ่มดาวน์โหลดไฟล์ทันทีที่กดปุ่ม
     window.location.href = `${API_URL}/download/${file}`;
 
-    // แจ้งเตือนหลังจากสั่งดาวน์โหลด (ดีเลย์เล็กน้อยเพื่อให้แน่ใจว่าเริ่มดาวน์โหลดแล้ว)
+    // แสดง Modal แจ้งเตือนหลังจากสั่งดาวน์โหลด
     setTimeout(() => {
-        alert("ดาวน์โหลดสำเร็จ!");
-    }); 
+        const modal = new bootstrap.Modal(document.getElementById('downloadSuccessModal'));
+        modal.show();
+    });
 }
+
+
+function closeModal() {
+    document.getElementById("downloadSuccessModal").style.display = "none";
+}
+
 
 
 // ฟังก์ชันลบไฟล์
