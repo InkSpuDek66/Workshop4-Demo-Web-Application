@@ -3,6 +3,7 @@ const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
 const cors = require("cors");
+const moment = require("moment");
 
 const port = 3000;
 const host = 'localhost'; //  ใช้ 'localhost' หรือใช้ '0.0.0.0' หากต้องการเชื่อมต่อจากทุกที่
@@ -18,7 +19,7 @@ app.use(express.static("uploads"));
 const storage = multer.diskStorage({
   destination: "uploads/",
   filename: (req, file, cb) => {
-    cb(null, '[' + Date.now() + '] - ' + file.originalname);
+    cb(null, `[${moment().format("YYYY-MM-DD_HH-mm-ss")}]-${file.originalname}`);
   }
 });
 const upload = multer({ storage });
