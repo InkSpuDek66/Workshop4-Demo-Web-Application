@@ -160,7 +160,7 @@ document.getElementById("fileInput").addEventListener("change", () => {
     preview.innerHTML = "";
 
     const file = fileInput.files[0];
-    if (!file) return;
+    if (!file) return; //หยุดการทำงานของฟังก์ชัน
 
     if (file.type.startsWith("image/")) {
         const img = document.createElement("img");
