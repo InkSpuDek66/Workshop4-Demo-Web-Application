@@ -26,7 +26,8 @@ function login() {
     const validUsers = { "admin": "1234", "user1": "password1", "user2": "password2" };
 
     if (lockoutTimeout) {
-        alert("คุณล็อกอินผิดพลาดเกิน 3 ครั้ง กรุณารอ 3 วินาทีแล้วลองใหม่อีกครั้ง");
+        const lockoutModal = new bootstrap.Modal(document.getElementById('lockoutModal'));
+        lockoutModal.show();
         return;
     }
 
@@ -34,7 +35,6 @@ function login() {
         failedAttempts = 0; // Reset failed attempts on successful login
         const lastLogin = new Date().toLocaleString();
         localStorage.setItem("user", JSON.stringify({ username, lastLogin }));
-
         document.getElementById("loginSection").classList.add("d-none");
         document.getElementById("fileSection").classList.remove("d-none");
         loadFiles();
@@ -45,17 +45,48 @@ function login() {
     } else {
         failedAttempts++;
         if (failedAttempts >= 3) {
+            const loginButton = document.querySelector("button[onclick='login()']");
+            const usernameInput = document.getElementById("username");
+            const passwordInput = document.getElementById("password");
+
+            loginButton.disabled = true;
+            loginButton.classList.add("btn-secondary");
+            loginButton.classList.remove("btn-primary");
+
+            usernameInput.disabled = true;
+            passwordInput.disabled = true;
+            usernameInput.classList.add("bg-secondary");
+            passwordInput.classList.add("bg-secondary");
+
             alert("คุณล็อกอินผิดพลาดเกิน 3 ครั้ง กรุณารอ 3 วินาทีแล้วลองใหม่อีกครั้ง");
+
             lockoutTimeout = setTimeout(() => {
                 failedAttempts = 0;
                 lockoutTimeout = null;
+
+                loginButton.disabled = false;
+                loginButton.classList.remove("btn-secondary");
+                loginButton.classList.add("btn-primary");
+
+                usernameInput.disabled = false;
+                passwordInput.disabled = false;
+                usernameInput.classList.remove("bg-secondary");
+                passwordInput.classList.remove("bg-secondary");
+
                 location.reload(); // Refresh the page
             }, 3000);
         } else {
-            alert("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!");
+            alert(`ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!ครั้งที่:${failedAttempts}`);
         }
     }
 }
+
+// Event listener for modal OK button
+document.getElementById("modalOkButton").addEventListener("click", () => {
+    const lockoutModal = bootstrap.Modal.getInstance(document.getElementById('lockoutModal'));
+    lockoutModal.hide();
+    location.reload(); // Refresh the page
+});
 
 // ฟังก์ชันออกจากระบบ
 function logout() {

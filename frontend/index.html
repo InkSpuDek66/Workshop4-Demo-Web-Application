@@ -6,6 +6,7 @@
     <title>File Upload System</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <body class="container py-5" style="background-color: rgb(157, 255, 255); ;">
 
@@ -45,6 +46,24 @@
         <center><button class="btn btn-danger " style="width: 8rem ; margin: 2rem;" onclick="logout()">ออกจากระบบ</button></center>
     </div>
     
+    <!-- Modal HTML -->
+    <div id="lockoutModal" class="modal fade" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">ล็อกอินผิดพลาด</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>คุณล็อกอินผิดพลาดเกิน 3 ครั้ง กรุณารอ 3 วินาทีแล้วลองใหม่อีกครั้ง</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="modalOkButton">ตกลง</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
