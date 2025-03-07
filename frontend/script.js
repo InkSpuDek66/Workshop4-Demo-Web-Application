@@ -123,6 +123,9 @@ async function uploadFile() {
     const formData = new FormData();
     formData.append("file", fileInput.files[0]);
 
+    const user = JSON.parse(localStorage.getItem("user"));
+    formData.append("username", user.username); // Add username to formData
+
     try {
         const res = await fetch(`${API_URL}/upload`, { method: "POST", body: formData });
         const data = await res.json();
@@ -153,10 +156,10 @@ async function loadFiles() {
             const li = document.createElement("li");
             li.className = "list-group-item d-flex justify-content-between align-items-center";
             li.innerHTML = `
-                ${file}
+                ${file.filename} ( อัปโหลดโดย : ${file.username})
                 <div>
-                    <button class="btn btn-primary btn-sm" onclick="handleDownloadCooldown(this, '${file}')">ดาวน์โหลด</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteFile('${file}')">ลบ</button>
+                    <button class="btn btn-primary btn-sm" onclick="handleDownloadCooldown(this, '${file.filename}')">ดาวน์โหลด</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteFile('${file.filename}')">ลบ</button>
                 </div>
             `;
             fileList.appendChild(li);

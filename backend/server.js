@@ -26,6 +26,12 @@ const upload = multer({ storage });
 
 // อัปโหลดไฟล์
 app.post("/upload", upload.single("file"), (req, res) => {
+  const { username } = req.body;
+  const fileData = {
+    filename: req.file.filename,
+    username: username
+  };
+  fs.writeFileSync(`uploads/${req.file.filename}.json`, JSON.stringify(fileData));
   res.json({ message: "Upload successful", filename: req.file.filename });
 });
 
@@ -33,7 +39,11 @@ app.post("/upload", upload.single("file"), (req, res) => {
 app.get("/files", (req, res) => {
   fs.readdir("uploads", (err, files) => {
     if (err) return res.status(500).json({ message: "Error retrieving files" });
-    res.json(files);
+    const fileList = files.filter(file => !file.endsWith('.json')).map(file => {
+      const fileData = JSON.parse(fs.readFileSync(`uploads/${file}.json`));
+      return fileData;
+    });
+    res.json(fileList);
   });
 });
 
